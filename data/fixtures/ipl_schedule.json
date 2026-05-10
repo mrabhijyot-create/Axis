@@ -1,0 +1,36 @@
+{
+  "season": "2026",
+  "matches": [
+    {
+      "match_key": "2026-05-10-rcb-csk",
+      "match_label": "IPL 2026 — Match 27: RCB vs CSK",
+      "scheduled_start_utc": "2026-05-10T14:00:00Z",
+      "venue": {
+        "name": "M. Chinnaswamy Stadium",
+        "city": "Bengaluru",
+        "country": "India",
+        "pitch_report": "Hard, even-bounce. Dew expected after 19:30 local."
+      },
+      "teams": [
+        {
+          "name": "Royal Challengers Bengaluru",
+          "short_name": "RCB",
+          "playing_xi": [],
+          "impact_options": [],
+          "recent_form": []
+        },
+        {
+          "name": "Chennai Super Kings",
+          "short_name": "CSK",
+          "playing_xi": [],
+          "impact_options": [],
+          "recent_form": []
+        }
+      ],
+      "context": {
+        "tournament_phase": "league_late",
+        "must_win_for": null
+      }
+    }
+  ]
+}

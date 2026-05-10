@@ -1,0 +1,51 @@
+name: Predict & Notify
+
+on:
+  schedule:
+    # Every 5 minutes. GitHub may delay scheduled runs by up to a few minutes
+    # under load — the T-30 ± 3-min trigger window in pick_due_match absorbs that.
+    - cron: "*/5 * * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write   # so we can commit data/fixtures/sent.json back
+
+concurrency:
+  group: predict
+  cancel-in-progress: false
+
+jobs:
+  predict:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install package
+        run: pip install -e .
+
+      - name: Run prediction tick
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          OPENWEATHER_API_KEY: ${{ secrets.OPENWEATHER_API_KEY }}
+          IPL_DB_URL: sqlite:///data/ipl.db
+        run: python scripts/cron_tick.py
+
+      - name: Commit notification state if changed
+        run: |
+          if git diff --quiet -- data/fixtures/sent.json; then
+            echo "no state change"
+          else
+            git config user.name 'github-actions[bot]'
+            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+            git add data/fixtures/sent.json
+            git commit -m "chore: mark prediction sent [skip ci]"
+            git push
+          fi

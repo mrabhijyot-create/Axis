@@ -134,6 +134,7 @@ class Prediction(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, index=True)
+    match_key: Mapped[str | None] = mapped_column(String, unique=True, index=True)
     match_label: Mapped[str] = mapped_column(String)
     team_a: Mapped[str] = mapped_column(String)
     team_b: Mapped[str] = mapped_column(String)
