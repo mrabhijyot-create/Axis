@@ -1,0 +1,11 @@
+{
+  "city": "Bengaluru",
+  "observed_at_utc": "2026-05-10T13:00:00Z",
+  "temperature_c": 28.4,
+  "humidity_pct": 71,
+  "wind_kph": 9.2,
+  "cloud_cover_pct": 45,
+  "precipitation_mm": 0.0,
+  "dew_point_c": 22.8,
+  "summary": "Warm and humid. High dew probability post-sunset."
+}
