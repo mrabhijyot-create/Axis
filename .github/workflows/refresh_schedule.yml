@@ -1,0 +1,53 @@
+name: Refresh IPL Schedule
+
+on:
+  schedule:
+    # 04:00 IST daily = 22:30 UTC the previous day. Quiet window — well after
+    # IPL match windows (which end ~19:00 UTC at latest), so no race with
+    # predict.yml committing sent.json.
+    - cron: "30 22 * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: refresh-schedule
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install package
+        run: pip install -e .
+
+      - name: Pull schedule from CricAPI
+        env:
+          CRICAPI_KEY: ${{ secrets.CRICAPI_KEY }}
+        run: python scripts/refresh_schedule.py
+
+      - name: Commit refreshed schedule if changed
+        run: |
+          if git diff --quiet -- data/fixtures/ipl_schedule.json; then
+            echo "no schedule change"
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add data/fixtures/ipl_schedule.json
+          git commit -m "chore: refresh IPL schedule from CricAPI [skip ci]"
+          for attempt in 1 2 3; do
+            git pull --rebase origin "${GITHUB_REF_NAME}" && git push && exit 0
+            echo "push attempt $attempt failed, retrying..."
+            sleep $((attempt * 2))
+          done
+          exit 1

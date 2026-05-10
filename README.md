@@ -60,8 +60,16 @@ runs end-to-end locally.
 
 ## Automated notifications via GitHub Actions
 
-`.github/workflows/predict.yml` runs `scripts/cron_tick.py` every 5 minutes.
-The tick:
+Two workflows run the whole loop:
+
+| Workflow | Cadence | Purpose |
+|---|---|---|
+| `.github/workflows/refresh_schedule.yml` | daily, 04:00 IST | Pulls the IPL fixture list from CricAPI and rewrites `data/fixtures/ipl_schedule.json`. |
+| `.github/workflows/predict.yml` | every 5 minutes | Picks the next match in a T-30 ± 3-min window, calls Claude, sends Telegram, marks `sent.json`. |
+
+### predict.yml
+
+`scripts/cron_tick.py` runs every 5 minutes. The tick:
 
 1. Reads `data/fixtures/ipl_schedule.json` (the season fixture list you
    maintain) and `data/fixtures/sent.json` (already-notified match keys).
@@ -69,24 +77,34 @@ The tick:
 3. Calls Claude Opus, persists a `Prediction` row, sends the result to
    Telegram, and appends the match key to `sent.json` (committed back).
 
-Setup steps:
+### refresh_schedule.yml
+
+`scripts/refresh_schedule.py` calls CricAPI's `/v1/series` then
+`/v1/series_info` to pull the upcoming IPL fixture list, normalizes it
+into the schema `ipl.schedule` reads, and writes `ipl_schedule.json`.
+The match key prefers CricAPI's stable `id` so reschedules don't
+double-fire notifications.
+
+### Setup
 
 1. Create a Telegram bot with [@BotFather](https://t.me/botfather) → copy the
    bot token. DM the bot once, then visit
    `https://api.telegram.org/bot<TOKEN>/getUpdates` to grab your chat ID.
-2. In the GitHub repo, add these **Secrets**:
+2. Sign up at [cricapi.com](https://cricapi.com) for a free API key
+   (~100 calls/day; we use 2 per refresh).
+3. In the GitHub repo, add these **Secrets**:
    `ANTHROPIC_API_KEY`, `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`,
-   optional `OPENWEATHER_API_KEY`.
-3. Update `data/fixtures/ipl_schedule.json` with the upcoming matches —
-   `match_key`, `scheduled_start_utc`, `venue.city`, and a `teams` array of
-   two `{name, ...}` objects is the minimum.
-4. The workflow needs `contents: write` permission (already declared) so it
-   can commit `sent.json` back. Verify it under
-   *Settings → Actions → General → Workflow permissions* (set to "Read and
-   write").
+   `CRICAPI_KEY`, optional `OPENWEATHER_API_KEY`.
+4. Set workflow permissions to "Read and write" under
+   *Settings → Actions → General → Workflow permissions* so each workflow
+   can commit its state file back.
+5. Manually trigger `Refresh IPL Schedule` once to populate
+   `ipl_schedule.json` with real upcoming matches; from then on it runs
+   itself every morning.
 
-Without those secrets the cron still runs and prints the would-be Telegram
-message to the Action log, so you can dry-run before flipping any keys.
+Without those secrets the workflows still run and dry-print the would-be
+Telegram message to the Action log, so you can validate end-to-end before
+flipping any keys.
 
 > The trigger fires at **T-30 from scheduled start**, which is when the toss
 > is normally already decided. Wiring a real `LIVE_FEED_URL` for true
