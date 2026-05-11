@@ -1,0 +1,26 @@
+{
+  "step1_weights": {
+    "venue_target_pressure": 18,
+    "key_matchup_index": 16,
+    "squad_rotation_delta": 8,
+    "impact_player_variance": 11,
+    "phase_execution_delta": 17,
+    "toss": 10,
+    "tournament_context": 12,
+    "schedule_fatigue": 8
+  },
+  "step1_rationale": "Bengaluru is a high-scoring deck with imminent dew, so chasing carries a meaningful structural edge — toss matters but second-innings phase execution matters more. RCB's recent middle-overs collapses against quality wrist-spin (Noor Ahmad) elevate the matchup index. Both squads are settled so rotation delta is muted. Tournament context is non-trivial because RCB are in must-win territory.",
+  "step2_prediction": {
+    "team_a": "Royal Challengers Bengaluru",
+    "team_b": "Chennai Super Kings",
+    "win_probability_a": 0.42,
+    "win_probability_b": 0.58,
+    "primary_drivers": [
+      "CSK won the toss and elected to field on a dew-affected surface where chasing teams have won 7 of the last 10 at this venue.",
+      "Noor Ahmad's googly vs RCB's middle order is the highest-leverage matchup; expected to operate the 8th–14th over window where RCB have lost the most wickets this season.",
+      "RCB's death-overs bowling (Yash Dayal, Bhuvi) has leaked 11.2 RPO over their last three games, a phase-execution gap CSK's finishers can exploit.",
+      "Schedule fatigue is symmetric (4 days rest each), so this variable is near-neutral."
+    ],
+    "confidence": "medium"
+  }
+}
