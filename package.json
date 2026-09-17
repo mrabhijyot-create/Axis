@@ -15,7 +15,9 @@
     "@react-three/fiber": "^8.15.0",
     "@react-three/drei": "^9.92.0",
     "lenis": "^1.0.42",
-    "gsap": "^3.12.5"
+    "gsap": "^3.12.5",
+    "sonner": "^2.0.8",
+    "vaul": "^1.1.2"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.2.1",

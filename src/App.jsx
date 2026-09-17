@@ -3,6 +3,8 @@ import { Canvas, useFrame } from "@react-three/fiber";
 import { Environment, MeshDistortMaterial, Icosahedron, Float, ContactShadows } from "@react-three/drei";
 import Lenis from "lenis";
 import * as THREE from "three";
+import { Drawer } from "vaul";
+import { Toaster, toast } from "sonner";
 
 /* ══════════════════════════════════════════════════════════════
    AXIS · CYBER REALITY
@@ -19,13 +21,13 @@ const TEXT3 = "#8d8880";
 const BORDER = "rgba(10,10,10,0.12)";
 
 const AGENTS = [
-  { num: "01", name: "Voice",   tag: "Jarvis / ElevenLabs" },
-  { num: "02", name: "Image",   tag: "DALL·E 3" },
-  { num: "03", name: "Video",   tag: "FFmpeg" },
-  { num: "04", name: "Music",   tag: "Synthesis" },
-  { num: "05", name: "Browse",  tag: "Chromium" },
-  { num: "06", name: "Blend",   tag: "Cycles · 4090" },
-  { num: "07", name: "Send",    tag: "Telegram" },
+  { num: "01", name: "Voice",   tag: "Jarvis / ElevenLabs", desc: "Synthesizes and parses natural speech, giving Axis a voice for every response and an ear for every command." },
+  { num: "02", name: "Image",   tag: "DALL·E 3", desc: "Renders concepts into imagery on demand — moodboards, references, finished frames." },
+  { num: "03", name: "Video",   tag: "FFmpeg", desc: "Cuts, encodes and assembles motion — the agent that turns raw footage into a delivered edit." },
+  { num: "04", name: "Music",   tag: "Synthesis", desc: "Composes and layers score from intent alone, tuned to the pace of whatever it's scoring." },
+  { num: "05", name: "Browse",  tag: "Chromium", desc: "Navigates the open web headlessly, gathering and verifying what the other agents need to act." },
+  { num: "06", name: "Blend",   tag: "Cycles · 4090", desc: "Handles 3D — modeling, lighting, rendering — on dedicated GPU compute." },
+  { num: "07", name: "Send",    tag: "Telegram", desc: "Delivers the final artifact wherever it needs to land, then waits for the next intent." },
 ];
 
 /* ─── Scroll progress hook ─── */
@@ -187,6 +189,40 @@ function Section({ eyebrow, children, align = "left" }) {
   );
 }
 
+/* ─── Agent detail drawer (Vaul) ─── */
+function AgentDrawer({ agent, onClose }) {
+  return (
+    <Drawer.Root open={!!agent} onOpenChange={open => !open && onClose()}>
+      <Drawer.Portal>
+        <Drawer.Overlay style={{ position: "fixed", inset: 0, background: "rgba(10,10,10,0.4)", zIndex: 90 }} />
+        <Drawer.Content
+          style={{
+            position: "fixed", left: 0, right: 0, bottom: 0, zIndex: 91,
+            background: PAPER, borderTop: `1px solid ${BORDER}`,
+            borderRadius: "16px 16px 0 0", padding: "14px 6vw 48px",
+            maxWidth: 640, margin: "0 auto",
+          }}
+        >
+          <div style={{ width: 40, height: 4, borderRadius: 2, background: BORDER, margin: "0 auto 28px" }} />
+          {agent && (
+            <>
+              <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 10, color: TEXT3, letterSpacing: ".16em", fontWeight: 600 }}>
+                {agent.num} · {agent.tag}
+              </div>
+              <Drawer.Title style={{ fontFamily: "'Instrument Serif',serif", fontSize: 36, color: INK, fontStyle: "italic", letterSpacing: "-0.01em", margin: "6px 0 16px" }}>
+                {agent.name}
+              </Drawer.Title>
+              <Drawer.Description style={{ fontFamily: "'DM Sans',sans-serif", fontSize: 15, color: TEXT2, lineHeight: 1.6, maxWidth: 480 }}>
+                {agent.desc}
+              </Drawer.Description>
+            </>
+          )}
+        </Drawer.Content>
+      </Drawer.Portal>
+    </Drawer.Root>
+  );
+}
+
 /* ─── Top progress bar ─── */
 function ScrollBar({ scrollRef }) {
   const bar = useRef();
@@ -267,9 +303,20 @@ export default function App() {
   const scrollP = useScroll();
   const scrollRef = useRef(0);
   scrollRef.current = scrollP;
+  const [activeAgent, setActiveAgent] = useState(null);
 
   return (
     <>
+      <Toaster
+        position="bottom-right"
+        toastOptions={{
+          style: {
+            background: PAPER, color: INK, border: `1px solid ${BORDER}`,
+            fontFamily: "'DM Sans',sans-serif", fontSize: 13, borderRadius: 4,
+          },
+        }}
+      />
+      <AgentDrawer agent={activeAgent} onClose={() => setActiveAgent(null)} />
       <ScrollBar scrollRef={scrollRef} />
       <Header />
       <Scene scrollRef={scrollRef} />
@@ -302,11 +349,15 @@ export default function App() {
         </h2>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px 32px", maxWidth: 520 }}>
           {AGENTS.map(a => (
-            <div key={a.num} style={{ borderTop: `1px solid ${BORDER}`, padding: "12px 0" }}>
+            <button
+              key={a.num}
+              onClick={() => setActiveAgent(a)}
+              style={{ border: "none", borderTop: `1px solid ${BORDER}`, padding: "12px 0", background: "none", textAlign: "left", cursor: "pointer", font: "inherit", width: "100%" }}
+            >
               <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 10, color: TEXT3, letterSpacing: ".16em", fontWeight: 600 }}>{a.num}</div>
               <div style={{ fontFamily: "'Instrument Serif',serif", fontSize: 22, color: INK, fontStyle: "italic", letterSpacing: "-0.01em", marginTop: 2 }}>{a.name}</div>
               <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 10, color: TEXT3, letterSpacing: ".12em", marginTop: 3, textTransform: "uppercase" }}>{a.tag}</div>
-            </div>
+            </button>
           ))}
         </div>
       </Section>
@@ -324,11 +375,13 @@ export default function App() {
         <h2 style={{ fontFamily: "'Instrument Serif',serif", fontSize: "clamp(48px, 7vw, 96px)", fontWeight: 400, letterSpacing: "-0.03em", lineHeight: 0.95, marginBottom: 32, color: INK }}>
           When the work is done,<br /><em>only the axis remains.</em>
         </h2>
-        <a href="#" style={{ display: "inline-block", padding: "14px 28px", background: INK, color: PAPER, fontFamily: "'DM Sans',sans-serif", fontSize: 13, fontWeight: 500, letterSpacing: ".05em", textDecoration: "none", transition: "background 180ms ease" }}
+        <button
+          onClick={() => toast("Command center — coming soon", { description: "Axis is still converging." })}
+          style={{ display: "inline-block", padding: "14px 28px", background: INK, color: PAPER, fontFamily: "'DM Sans',sans-serif", fontSize: 13, fontWeight: 500, letterSpacing: ".05em", border: "none", cursor: "pointer", transition: "background 180ms ease" }}
           onMouseEnter={e => e.currentTarget.style.background = ACCENT}
           onMouseLeave={e => e.currentTarget.style.background = INK}>
           Enter the command center →
-        </a>
+        </button>
       </Section>
 
       <footer style={{ padding: "32px 6vw", borderTop: `1px solid ${BORDER}`, position: "relative", zIndex: 2, display: "flex", justifyContent: "space-between", fontFamily: "'JetBrains Mono',monospace", fontSize: 10, color: TEXT3, letterSpacing: ".16em", textTransform: "uppercase" }}>
