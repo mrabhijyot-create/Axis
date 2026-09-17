@@ -1,0 +1,78 @@
+<!doctype html>
+<!--
+  Local stand-in for the real DS-160 form, used only to exercise the
+  Layer 2 form-fill pipeline (autofill -> CAPTCHA gate -> manual submit ->
+  confirmation extraction) offline. This is NOT a copy of, or a scraper
+  target for, the real ceac.state.gov form.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Mock DS-160 (local test fixture)</title>
+</head>
+<body>
+  <h1>Mock DS-160</h1>
+  <form id="ds160-form">
+    <label>Full Name <input id="full_name" name="full_name" /></label>
+    <label>Date of Birth <input id="date_of_birth" name="date_of_birth" /></label>
+    <label>Gender
+      <select id="gender" name="gender">
+        <option value="">Select</option>
+        <option value="Male">Male</option>
+        <option value="Female">Female</option>
+        <option value="Other">Other</option>
+      </select>
+    </label>
+    <label>Marital Status
+      <select id="marital_status" name="marital_status">
+        <option value="">Select</option>
+        <option value="Single">Single</option>
+        <option value="Married">Married</option>
+        <option value="Divorced">Divorced</option>
+        <option value="Widowed">Widowed</option>
+      </select>
+    </label>
+    <label>Nationality <input id="nationality" name="nationality" /></label>
+    <label>Passport Number <input id="passport_number" name="passport_number" /></label>
+    <label>Passport Expiry <input id="passport_expiry" name="passport_expiry" /></label>
+    <label>Street <input id="current_street" name="current_street" /></label>
+    <label>City <input id="current_city" name="current_city" /></label>
+    <label>State <input id="current_state" name="current_state" /></label>
+    <label>ZIP <input id="current_zip" name="current_zip" /></label>
+    <label>Country <input id="current_country" name="current_country" /></label>
+    <label>Email <input id="email" name="email" /></label>
+    <label>Phone <input id="phone_number" name="phone_number" /></label>
+    <label>Purpose of Visit <input id="us_visit_purpose" name="us_visit_purpose" /></label>
+    <label>Intended Stay <input id="intended_stay_duration" name="intended_stay_duration" /></label>
+    <label>Occupation <input id="current_occupation" name="current_occupation" /></label>
+    <label>Employer <input id="current_employer" name="current_employer" /></label>
+
+    <fieldset id="captcha-gate">
+      <legend>CAPTCHA (stand-in)</legend>
+      <p>Type "HUMAN" to simulate solving the CAPTCHA.</p>
+      <input id="captcha_input" name="captcha_input" />
+    </fieldset>
+
+    <button type="button" id="submit-btn">Submit</button>
+  </form>
+
+  <div id="result" hidden>
+    <h2>Application Received</h2>
+    <p>Confirmation Number: <span id="confirmation-number"></span></p>
+  </div>
+
+  <script>
+    document.getElementById('submit-btn').addEventListener('click', () => {
+      const captcha = document.getElementById('captcha_input').value.trim().toUpperCase();
+      if (captcha !== 'HUMAN') {
+        alert('Please solve the CAPTCHA before submitting.');
+        return;
+      }
+      const confirmationNumber = 'AA' + Math.floor(100000 + Math.random() * 899999);
+      document.getElementById('confirmation-number').textContent = confirmationNumber;
+      document.getElementById('ds160-form').hidden = true;
+      document.getElementById('result').hidden = false;
+    });
+  </script>
+</body>
+</html>
