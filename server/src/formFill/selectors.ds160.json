@@ -1,0 +1,56 @@
+{
+  "mock": {
+    "urlIsLocalFixture": true,
+    "description": "Selectors for the local mock-ds160.html fixture used to prove the fill/CAPTCHA-wait/confirmation-extraction pipeline works end-to-end without touching a real government site.",
+    "fields": {
+      "personal.full_name": { "selector": "#full_name", "type": "text" },
+      "personal.date_of_birth": { "selector": "#date_of_birth", "type": "text" },
+      "personal.gender": { "selector": "#gender", "type": "select" },
+      "personal.marital_status": { "selector": "#marital_status", "type": "select" },
+      "personal.nationality": { "selector": "#nationality", "type": "text" },
+      "personal.passport_number": { "selector": "#passport_number", "type": "text" },
+      "personal.passport_expiry": { "selector": "#passport_expiry", "type": "text" },
+      "address.current_street": { "selector": "#current_street", "type": "text" },
+      "address.current_city": { "selector": "#current_city", "type": "text" },
+      "address.current_state": { "selector": "#current_state", "type": "text" },
+      "address.current_zip": { "selector": "#current_zip", "type": "text" },
+      "address.current_country": { "selector": "#current_country", "type": "text" },
+      "contact.email": { "selector": "#email", "type": "text" },
+      "contact.phone_number": { "selector": "#phone_number", "type": "text" },
+      "travel.us_visit_purpose": { "selector": "#us_visit_purpose", "type": "text" },
+      "travel.intended_stay_duration": { "selector": "#intended_stay_duration", "type": "text" },
+      "employment.current_occupation": { "selector": "#current_occupation", "type": "text" },
+      "employment.current_employer": { "selector": "#current_employer", "type": "text" }
+    },
+    "captchaSelector": "#captcha-gate",
+    "submitSelector": "#submit-btn",
+    "confirmationSelector": "#confirmation-number"
+  },
+  "live": {
+    "url": "https://ceac.state.gov/genniv/",
+    "note": "PLACEHOLDER — NOT verified against the live DS-160 form. Per the spec's own instruction ('test against the actual DS-160 form; do not assume field names or layout'), open the real form in a browser, inspect each control with devtools, and replace every 'TODO' selector below before using mode=live. Field ids on ceac.state.gov are dynamically generated per session and are expected to need a run-time discovery step rather than static selectors.",
+    "fields": {
+      "personal.full_name": { "selector": "TODO", "type": "text" },
+      "personal.date_of_birth": { "selector": "TODO", "type": "text" },
+      "personal.gender": { "selector": "TODO", "type": "select" },
+      "personal.marital_status": { "selector": "TODO", "type": "select" },
+      "personal.nationality": { "selector": "TODO", "type": "select" },
+      "personal.passport_number": { "selector": "TODO", "type": "text" },
+      "personal.passport_expiry": { "selector": "TODO", "type": "text" },
+      "address.current_street": { "selector": "TODO", "type": "text" },
+      "address.current_city": { "selector": "TODO", "type": "text" },
+      "address.current_state": { "selector": "TODO", "type": "text" },
+      "address.current_zip": { "selector": "TODO", "type": "text" },
+      "address.current_country": { "selector": "TODO", "type": "select" },
+      "contact.email": { "selector": "TODO", "type": "text" },
+      "contact.phone_number": { "selector": "TODO", "type": "text" },
+      "travel.us_visit_purpose": { "selector": "TODO", "type": "select" },
+      "travel.intended_stay_duration": { "selector": "TODO", "type": "text" },
+      "employment.current_occupation": { "selector": "TODO", "type": "select" },
+      "employment.current_employer": { "selector": "TODO", "type": "text" }
+    },
+    "captchaSelector": "TODO",
+    "submitSelector": "TODO",
+    "confirmationSelector": "TODO"
+  }
+}
