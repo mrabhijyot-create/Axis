@@ -24,6 +24,11 @@ class Settings(BaseSettings):
 
     ipl_db_url: str = f"sqlite:///{DATA_DIR / 'ipl.db'}"
 
+    # API exposure. Loopback by default; POST /predict needs this token when set
+    # and is refused from other machines when it is not.
+    ipl_api_host: str = "127.0.0.1"
+    ipl_api_token: str | None = None
+
     warmup_lead_minutes: int = 30
     active_lead_minutes: int = 10
 
