@@ -9,6 +9,7 @@ import plotly.express as px
 import streamlit as st
 
 API_BASE = os.environ.get("IPL_API_BASE", "http://localhost:8000")
+API_TOKEN = os.environ.get("IPL_API_TOKEN")
 
 st.set_page_config(page_title="Axis · IPL Prediction", layout="wide")
 
@@ -26,7 +27,8 @@ def _api_get(path: str, **params) -> dict | list | None:
 
 def _api_post(path: str) -> dict | list | None:
     try:
-        resp = httpx.post(f"{API_BASE}{path}", timeout=30.0)
+        headers = {"X-API-Token": API_TOKEN} if API_TOKEN else {}
+        resp = httpx.post(f"{API_BASE}{path}", headers=headers, timeout=30.0)
         resp.raise_for_status()
         return resp.json()
     except httpx.HTTPError as exc:

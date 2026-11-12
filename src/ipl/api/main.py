@@ -1,13 +1,16 @@
 """FastAPI bridge between SQLite, the inference engine, and the Streamlit UI."""
 from __future__ import annotations
 
+import hmac
+import ipaddress
 from contextlib import asynccontextmanager
 from typing import Any
 
-from fastapi import FastAPI, HTTPException
+from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request
 from sqlalchemy import desc, select
 
 from ipl.api.scheduler import PredictionScheduler
+from ipl.config import settings
 from ipl.db import (
     Match,
     Player,
@@ -39,6 +42,37 @@ async def lifespan(app: FastAPI):
 app = FastAPI(title="IPL Axis API", version="0.1.0", lifespan=lifespan)
 
 
+def _is_loopback(host: str) -> bool:
+    try:
+        return ipaddress.ip_address(host).is_loopback
+    except ValueError:
+        return False
+
+
+def require_predict_auth(
+    request: Request, x_api_token: str | None = Header(default=None)
+) -> None:
+    """Gate endpoints that spend paid API credits.
+
+    With IPL_API_TOKEN set, callers must send it as X-API-Token. Without it,
+    only requests from this machine are accepted. Behind a reverse proxy every
+    request looks local, so set IPL_API_TOKEN for any deployed instance.
+    """
+    expected = settings.ipl_api_token
+    if expected:
+        if not x_api_token or not hmac.compare_digest(
+            x_api_token.encode(), expected.encode()
+        ):
+            raise HTTPException(status_code=401, detail="missing or invalid X-API-Token")
+        return
+    host = request.client.host if request.client else ""
+    if not _is_loopback(host):
+        raise HTTPException(
+            status_code=403,
+            detail="POST /predict is limited to localhost unless IPL_API_TOKEN is set",
+        )
+
+
 @app.get("/health")
 def health() -> dict[str, Any]:
     return {"status": "ok", "scheduler_phase": _scheduler.phase if _scheduler else "not-started"}
@@ -56,7 +90,7 @@ def latest_prediction() -> dict[str, Any]:
 
 
 @app.get("/predictions")
-def list_predictions(limit: int = 25) -> list[dict[str, Any]]:
+def list_predictions(limit: int = Query(25, ge=1, le=100)) -> list[dict[str, Any]]:
     with SessionLocal() as session:
         rows = (
             session.execute(
@@ -68,7 +102,7 @@ def list_predictions(limit: int = 25) -> list[dict[str, Any]]:
         return [_serialise_prediction(r) for r in rows]
 
 
-@app.post("/predict")
+@app.post("/predict", dependencies=[Depends(require_predict_auth)])
 def manual_predict() -> dict[str, Any]:
     """Force-run a prediction now (bypass the scheduler)."""
     return run_prediction()
