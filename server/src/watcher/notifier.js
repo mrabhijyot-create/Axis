@@ -3,6 +3,8 @@
 // and SMS are left as clearly-marked extension points rather than fake
 // implementations — wiring either up means picking a provider (SES, Twilio,
 // etc.) and it shouldn't happen silently inside a spec-compliance build.
+import { assertPublicWebhookUrl } from "./safeUrl.js";
+
 export class Notifier {
   constructor({ channels = ["console"], webhookUrl = null } = {}) {
     this.channels = channels;
@@ -18,8 +20,13 @@ export class Notifier {
           results.push({ channel, ok: true });
         } else if (channel === "webhook") {
           if (!this.webhookUrl) throw new Error("webhookUrl not configured");
+          // Checked again at send time (the watcher may fire hours after the
+          // route validated it), and redirects are not followed so a public
+          // URL cannot bounce the request to an internal address.
+          await assertPublicWebhookUrl(this.webhookUrl);
           const res = await fetch(this.webhookUrl, {
             method: "POST",
+            redirect: "manual",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload),
           });
